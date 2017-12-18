@@ -1,24 +1,17 @@
 package master2017.flink.detectors;
 
 import master2017.flink.events.CarEvent;
+import master2017.flink.functions.filters.HigherSpeedFilterFunction;
 import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class SpeedLimitDetector extends Detector {
     Integer speedLimitThreshold;
 
-    static  FilterFunction<CarEvent> higherSpeedFilterFunction = new FilterFunction<CarEvent>() {
-        @Override
-        public boolean filter(CarEvent carEvent) throws Exception {
-            return carEvent.getSpeedModule() > 90;// SpeedLimitDetector.this.getSpeedLimitThreshold();
-        }
-    };
 
     public SpeedLimitDetector(
             String outputFolder,
@@ -33,7 +26,6 @@ public class SpeedLimitDetector extends Detector {
     public SpeedLimitDetector(String outputFolder, KeyedStream<CarEvent, Tuple3<String, String, Boolean>> carEventKeyedStream, String outputFileName, Integer speedLimitThreshold, FilterFunction<CarEvent> higherSpeedFilterFunction) {
         super(outputFolder, carEventKeyedStream, outputFileName);
         this.speedLimitThreshold = speedLimitThreshold;
-        this.higherSpeedFilterFunction = higherSpeedFilterFunction;
     }
 
     public Integer getSpeedLimitThreshold() {
@@ -48,7 +40,7 @@ public class SpeedLimitDetector extends Detector {
     @Override
     public void processCarEventKeyedStream() {
         this.getCarEventKeyedStream().filter(
-                higherSpeedFilterFunction
+                new HigherSpeedFilterFunction(speedLimitThreshold)
         ).map(new MapFunction<CarEvent, Tuple6<Long, String, String, Integer, Boolean, Integer> >() {
             @Override
             public Tuple6<Long, String, String, Integer, Boolean, Integer> map(CarEvent carEvent) throws Exception {
@@ -61,7 +53,7 @@ public class SpeedLimitDetector extends Detector {
                         carEvent.getSpeedModule()
                 );
             }
-        }).writeAsCsv("/tmp/asd.csv");
+        }).writeAsCsv(getOutputCSVFilePath().toString());
     }
 
 

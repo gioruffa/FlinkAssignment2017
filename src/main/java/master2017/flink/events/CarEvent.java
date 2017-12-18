@@ -1,9 +1,11 @@
 package master2017.flink.events;
 
+import java.io.Serializable;
+
 /**
  * Commodity POJO for the input line
  */
-public class CarEvent {
+public class CarEvent implements Serializable{
     Long timestamp;
     String vehicleID;
     Integer speedModule; //speed in physics is an array, we are just considering the module. It has only pos. values
