@@ -1,7 +1,12 @@
 package master2017.flink;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import master2017.flink.detectors.SpeedLimitDetector;
 import master2017.flink.events.CarEvent;
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.slf4j.LoggerFactory;
@@ -11,7 +16,7 @@ import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.util.Collector;
-import scala.Tuple2;
+
 
 import java.io.File;
 
@@ -57,13 +62,38 @@ public class VehicleTelematics {
                 }
         );
 
-        carEventStream.map(new MapFunction<CarEvent, CarEvent>() {
+        //check if it is working
+//        carEventStream.map(new MapFunction<CarEvent, CarEvent>() {
+//            @Override
+//            public CarEvent map(CarEvent carEvent) throws Exception {
+//                System.out.println(carEvent.toString());
+//                return carEvent;
+//            }
+//        });
+
+        /*
+         * We have decided to parallelise with the finest grain possible.
+         * So we are basically following a single car on an highway on a single direction
+         */
+        KeyedStream<CarEvent, Tuple3<String, String, Boolean>> carEventKeyedStream = carEventStream.keyBy(new KeySelector<CarEvent, Tuple3<String, String, Boolean>>() {
             @Override
-            public CarEvent map(CarEvent carEvent) throws Exception {
-                System.out.println(carEvent.toString());
-                return carEvent;
+            public Tuple3<String, String, Boolean> getKey(CarEvent carEvent) throws Exception {
+                return new Tuple3<>(
+                        carEvent.getVehicleID(),
+                        carEvent.getHighwayID(),
+                        carEvent.getWestbound()
+                );
             }
         });
+
+        SpeedLimitDetector speedLimitDetector = new SpeedLimitDetector(
+            outputDirectoryPath,
+            carEventKeyedStream,
+            90
+        );
+
+        speedLimitDetector.processCarEventKeyedStream();
+
 
         try {
             streamEnv.execute();
