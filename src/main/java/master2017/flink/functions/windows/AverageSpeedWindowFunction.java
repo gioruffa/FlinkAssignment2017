@@ -41,8 +41,8 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
     }
 
     /**
-     * Please note that this function has been designed to work without the event in the window to be sorted
-     * by event time.
+     * Please note that this function has been designed taking into account that the event in the window
+     * can be unsorted (as it usually is)
      * @param key
      * @param timeWindow
      * @param input
