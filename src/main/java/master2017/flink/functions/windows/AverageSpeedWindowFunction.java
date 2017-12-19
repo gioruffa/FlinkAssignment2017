@@ -40,6 +40,15 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
         return endingSegment == 99 ? endingSegment : endingSegment + 1;
     }
 
+    /**
+     * Please note that this function has been designed to work without the event in the window to be sorted
+     * by event time.
+     * @param key
+     * @param timeWindow
+     * @param input
+     * @param collector
+     * @throws Exception
+     */
     @Override
     public void apply(
             Tuple3<String, String, Boolean> key,
@@ -87,30 +96,29 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
 
         CarEvent enteringEvent = null;
         CarEvent exitingEvent = null;
-        //TODO: just take the min time and the maximum time of sector included!
 
+        //get the minimum and maximum time and the associated values
         while (otherIterator.hasNext())
         {
             CarEvent carEvent = otherIterator.next();
-            //we want the earliest enter and the latest exit
-            if(carEvent.getSegment().equals(enteringSegment))
+            //avoid segments outside start and end
+            //remember that we still have events in 51 and 57 segment
+            if(!(carEvent.getSegment().equals(enteringSegment) || carEvent.getSegment().equals(exitingSegment) ))
             {
-                if (carEvent.getTimestamp().compareTo(enteringTimestamp) < 0 )
-                {
-                    enteringTimestamp = carEvent.getTimestamp();
-                    enteringEvent = carEvent;
-                }
-//                enteringTimestamp = carEvent.getTimestamp().compareTo(enteringTimestamp) < 0 ? carEvent.getTimestamp() : enteringTimestamp;
+                continue;
             }
-            else if (carEvent.getSegment().equals(exitingSegment))
+
+            if (carEvent.getTimestamp().compareTo(enteringTimestamp) < 0 )
             {
-                if(carEvent.getTimestamp().compareTo(exitingTimestamp) > 0)
-                {
-                    exitingTimestamp = carEvent.getTimestamp();
-                    exitingEvent = carEvent;
-                }
-//                exitingTimestamp = carEvent.getTimestamp().compareTo(exitingTimestamp) > 0  ? carEvent.getTimestamp() : exitingTimestamp;
+                enteringTimestamp = carEvent.getTimestamp();
+                enteringEvent = carEvent;
             }
+            if(carEvent.getTimestamp().compareTo(exitingTimestamp) > 0)
+            {
+                exitingTimestamp = carEvent.getTimestamp();
+                exitingEvent = carEvent;
+            }
+
         }
         AverageSpeedViolationEvent candidateViolationEvent = new AverageSpeedViolationEvent(
                 enteringEvent,
