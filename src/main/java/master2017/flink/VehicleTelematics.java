@@ -1,6 +1,8 @@
 package master2017.flink;
 
 import com.sun.org.apache.xpath.internal.operations.Bool;
+import master2017.flink.KeySelectors.VidHighwayWestboundKeySelector;
+import master2017.flink.detectors.AverageSpeedLimitDetector;
 import master2017.flink.detectors.SpeedLimitDetector;
 import master2017.flink.events.CarEvent;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -31,16 +33,15 @@ public class VehicleTelematics {
             return;
         }
 
-        //TODO: come back to store only string not files
         inputFilePath = args[0];
         outputDirectoryPath = args[1];
 
         final StreamExecutionEnvironment streamEnv = StreamExecutionEnvironment.getExecutionEnvironment();
         streamEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
-        streamEnv.setParallelism(1);
+//        streamEnv.setParallelism(1);
 
 
-        DataStreamSource<String> fileStreamSource = streamEnv.readTextFile(inputFilePath);
+        DataStreamSource<String> fileStreamSource = streamEnv.readTextFile(inputFilePath).setParallelism(1);
 
         SingleOutputStreamOperator<CarEvent> carEventStream = fileStreamSource.flatMap(new FlatMapFunction<String, CarEvent>() {
             @Override
@@ -53,14 +54,15 @@ public class VehicleTelematics {
                     ex.printStackTrace();
                 }
             }
-        }).assignTimestampsAndWatermarks(
+        }).setParallelism(1)
+                .assignTimestampsAndWatermarks(
                 new AscendingTimestampExtractor<CarEvent>() {
                     @Override
                     public long extractAscendingTimestamp(CarEvent carEvent) {
                         return carEvent.getTimestamp() * 1000;
                     }
                 }
-        );
+        ).setParallelism(1);
 
         //check if it is working
 //        carEventStream.map(new MapFunction<CarEvent, CarEvent>() {
@@ -75,25 +77,26 @@ public class VehicleTelematics {
          * We have decided to parallelise with the finest grain possible.
          * So we are basically following a single car on an highway on a single direction
          */
-        KeyedStream<CarEvent, Tuple3<String, String, Boolean>> carEventKeyedStream = carEventStream.keyBy(new KeySelector<CarEvent, Tuple3<String, String, Boolean>>() {
-            @Override
-            public Tuple3<String, String, Boolean> getKey(CarEvent carEvent) throws Exception {
-                return new Tuple3<>(
-                        carEvent.getVehicleID(),
-                        carEvent.getHighwayID(),
-                        carEvent.getWestbound()
-                );
-            }
-        });
-
-        SpeedLimitDetector speedLimitDetector = new SpeedLimitDetector(
-            outputDirectoryPath,
-            carEventKeyedStream,
-            90
+        KeyedStream<CarEvent, Tuple3<String, String, Boolean>> carEventKeyedStream = carEventStream.keyBy(
+                new VidHighwayWestboundKeySelector()
         );
 
-        speedLimitDetector.processCarEventKeyedStream();
+//        SpeedLimitDetector speedLimitDetector = new SpeedLimitDetector(
+//            outputDirectoryPath,
+//            carEventKeyedStream,
+//            90
+//        );
 
+        AverageSpeedLimitDetector averageSpeedLimitDetector = new AverageSpeedLimitDetector(
+                outputDirectoryPath,
+                carEventKeyedStream,
+                60,
+                52,
+                56
+        );
+
+//        speedLimitDetector.processCarEventKeyedStream();
+        averageSpeedLimitDetector.processCarEventKeyedStream();
 
         try {
             streamEnv.execute();
