@@ -1,6 +1,7 @@
 package master2017.flink;
 
 import com.sun.org.apache.xpath.internal.operations.Bool;
+import master2017.flink.detectors.AccidentDetector;
 import master2017.flink.detectors.SpeedLimitDetector;
 import master2017.flink.events.CarEvent;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -92,7 +93,16 @@ public class VehicleTelematics {
             90
         );
 
-        speedLimitDetector.processCarEventKeyedStream();
+        //speedLimitDetector.processCarEventKeyedStream();
+
+        // TEST Jaime
+        AccidentDetector accidentDetector = new AccidentDetector(
+                outputDirectoryPath,
+                carEventKeyedStream
+        );
+
+        accidentDetector.processCarEventKeyedStream();
+        // END
 
 
         try {
