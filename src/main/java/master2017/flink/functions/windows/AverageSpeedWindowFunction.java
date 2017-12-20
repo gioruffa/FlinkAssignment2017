@@ -1,9 +1,7 @@
 package master2017.flink.functions.windows;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import master2017.flink.events.AverageSpeedViolationEvent;
 import master2017.flink.events.CarEvent;
-import org.apache.flink.api.java.tuple.Tuple1;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
@@ -64,7 +62,7 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
         boolean hasStartingMinus1 = false;
         boolean hasEndingPlus1 = false;
 
-        //first of all we need to detect if the var has completed the track.
+        //first of all we need to detect if the car has completed the track.
         //we need at least one element in startingSegment-1 and endingSegment+1 (regardless of the direction)
 
         while (inputIterator.hasNext())
@@ -131,9 +129,6 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
             System.out.println("Average speed violation detected");
             collector.collect(candidateViolationEvent);
         }
-
-
-        //Once we know if the car has completed the pass we need the first element in
 
         System.out.println("Closing window");
     }

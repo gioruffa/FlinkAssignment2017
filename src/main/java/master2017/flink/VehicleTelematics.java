@@ -81,6 +81,8 @@ public class VehicleTelematics {
                 new VidHighwayWestboundKeySelector()
         );
 
+        
+
 //        SpeedLimitDetector speedLimitDetector = new SpeedLimitDetector(
 //            outputDirectoryPath,
 //            carEventKeyedStream,
