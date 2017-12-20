@@ -33,7 +33,7 @@ public class AccidentDetector extends Detector {
 
                                 Iterator<CarEvent> carEventIterator = iterable.iterator();
                                 Long startTimestamp = null;
-                                Long stopTimestamp = null;
+                                Long stopTimestamp;
                                 Integer lastPosition = null;
                                 Integer i = 1;
 
@@ -58,7 +58,7 @@ public class AccidentDetector extends Detector {
 
                                             if (i == 4) {
                                                 stopTimestamp = carEvent.getTimestamp();
-                                                Tuple7<Long,Long,String,String,Integer,Boolean,Integer> finalTuple = new Tuple7(
+                                                Tuple7<Long,Long,String,String,Integer,Boolean,Integer> finalTuple = new Tuple7<>(
                                                         startTimestamp,
                                                         stopTimestamp,
                                                         carEvent.getVehicleID(),

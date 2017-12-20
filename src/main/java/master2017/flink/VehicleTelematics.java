@@ -1,25 +1,21 @@
 package master2017.flink;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import master2017.flink.KeySelectors.VidHighwayWestboundKeySelector;
-import master2017.flink.detectors.AverageSpeedLimitDetector;
 import master2017.flink.detectors.AccidentDetector;
+import master2017.flink.detectors.AverageSpeedLimitDetector;
 import master2017.flink.detectors.SpeedLimitDetector;
 import master2017.flink.events.CarEvent;
-import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.java.functions.KeySelector;
-import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.streaming.api.datastream.KeyedStream;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
-import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 import org.apache.flink.api.common.functions.FlatMapFunction;
+import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
+import org.apache.flink.streaming.api.datastream.KeyedStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.util.Collector;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
