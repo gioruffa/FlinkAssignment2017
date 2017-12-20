@@ -94,8 +94,8 @@ public class VehicleTelematics {
                 carEventStream
         );
 
-//        speedLimitDetector.processCarEventStream();
-//        averageSpeedLimitDetector.processCarEventStream();
+        speedLimitDetector.processCarEventStream();
+        averageSpeedLimitDetector.processCarEventStream();
         accidentDetector.processCarEventStream();
 
 
