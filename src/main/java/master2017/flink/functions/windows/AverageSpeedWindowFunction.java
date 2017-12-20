@@ -82,7 +82,7 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
 //            CarEvent event = debugIterator.next();
 //            System.out.println(event);
 //        }
-        System.out.println("Car has completed the segments!");
+//        System.out.println("Car has completed the segments!");
 
 
         //if the car is going westbound -> first event in time is endingSegment, last is startingSegment
@@ -125,10 +125,10 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
                 exitingEvent
         );
 
-        System.out.println(candidateViolationEvent);
+//        System.out.println(candidateViolationEvent);
         if(candidateViolationEvent.getAvgSpeedInMilesPerHour().compareTo(speedLimit.doubleValue()) > 0)
         {
-            System.out.println("Average speed violation detected");
+//            System.out.println("Average speed violation detected");
             collector.collect(candidateViolationEvent);
         }
 

@@ -9,7 +9,6 @@ import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,17 +46,17 @@ public class VehicleTelematics {
                     ex.printStackTrace();
                 }
             }
-        }).setParallelism(1)
-                .assignTimestampsAndWatermarks(
-                        new AscendingTimestampExtractor<CarEvent>() {
-                            @Override
-                            public long extractAscendingTimestamp(CarEvent carEvent) {
-                                return carEvent.getTimestamp() * 1000;
-                            }
-                        }
-                )
-                .setParallelism(1);
-
+        })
+//                .assignTimestampsAndWatermarks(
+//                        new AscendingTimestampExtractor<CarEvent>() {
+//                            @Override
+//                            public long extractAscendingTimestamp(CarEvent carEvent) {
+//                                return carEvent.getTimestamp() * 1000;
+//                            }
+//                        }
+//                )
+//                .setParallelism(1);
+        ;
         //check if it is working
 //        carEventStream.map(new MapFunction<CarEvent, CarEvent>() {
 //            @Override
@@ -95,8 +94,8 @@ public class VehicleTelematics {
                 carEventStream
         );
 
-        speedLimitDetector.processCarEventStream();
-        averageSpeedLimitDetector.processCarEventStream();
+//        speedLimitDetector.processCarEventStream();
+//        averageSpeedLimitDetector.processCarEventStream();
         accidentDetector.processCarEventStream();
 
 

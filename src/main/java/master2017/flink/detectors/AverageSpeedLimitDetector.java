@@ -10,6 +10,7 @@ import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
+import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor;
 import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
@@ -34,10 +35,18 @@ public class AverageSpeedLimitDetector extends Detector {
     public void processCarEventStream() {
         getCarEventStream()
                 .filter(
-                    new SegmentRangeFilterFunction(
-                            startingSegment - 1,
-                            endingSegment + 1
-                    ) //the car has to complete the sectors, so the only way to know if they appear before and late
+                        new SegmentRangeFilterFunction(
+                                startingSegment - 1,
+                                endingSegment + 1
+                        ) //the car has to complete the sectors, so the only way to know if they appear before and late
+                )
+                .assignTimestampsAndWatermarks(
+                        new AscendingTimestampExtractor<CarEvent>() {
+                            @Override
+                            public long extractAscendingTimestamp(CarEvent carEvent) {
+                                return carEvent.getTimestamp() * 1000;
+                            }
+                        }
                 )
                 .keyBy(new VidHighwayWestboundKeySelector())
                 .window(EventTimeSessionWindows.withGap(Time.seconds(30)))
