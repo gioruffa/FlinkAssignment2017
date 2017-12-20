@@ -3,6 +3,7 @@ package master2017.flink;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import master2017.flink.KeySelectors.VidHighwayWestboundKeySelector;
 import master2017.flink.detectors.AverageSpeedLimitDetector;
+import master2017.flink.detectors.AccidentDetector;
 import master2017.flink.detectors.SpeedLimitDetector;
 import master2017.flink.events.CarEvent;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -81,13 +82,12 @@ public class VehicleTelematics {
                 new VidHighwayWestboundKeySelector()
         );
 
-        
 
-//        SpeedLimitDetector speedLimitDetector = new SpeedLimitDetector(
-//            outputDirectoryPath,
-//            carEventKeyedStream,
-//            90
-//        );
+        SpeedLimitDetector speedLimitDetector = new SpeedLimitDetector(
+            outputDirectoryPath,
+            carEventKeyedStream,
+            90
+        );
 
         AverageSpeedLimitDetector averageSpeedLimitDetector = new AverageSpeedLimitDetector(
                 outputDirectoryPath,
@@ -97,8 +97,15 @@ public class VehicleTelematics {
                 56
         );
 
-//        speedLimitDetector.processCarEventKeyedStream();
+        AccidentDetector accidentDetector = new AccidentDetector(
+                outputDirectoryPath,
+                carEventKeyedStream
+        );
+
+        speedLimitDetector.processCarEventKeyedStream();
         averageSpeedLimitDetector.processCarEventKeyedStream();
+        accidentDetector.processCarEventKeyedStream();
+
 
         try {
             streamEnv.execute();
