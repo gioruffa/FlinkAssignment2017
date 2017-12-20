@@ -10,8 +10,6 @@ import org.apache.flink.util.Collector;
 
 import java.util.Iterator;
 
-//import master2017.flink.functions.windowFunctions.AccidentAlarmTriggerFunction;
-
 public class AccidentDetector extends Detector {
 
     public AccidentDetector(
@@ -25,7 +23,6 @@ public class AccidentDetector extends Detector {
     public void processCarEventKeyedStream() {
                 this.getCarEventKeyedStream()
                         .countWindow(4,1)
-                        //.apply(new AccidentAlarmTriggerFunction())
                         .apply(new WindowFunction<CarEvent, Tuple7<Long,Long,String,String,Integer,Boolean,Integer>, Tuple3<String,String,Boolean>, GlobalWindow>() {
 
                             @Override
@@ -39,8 +36,7 @@ public class AccidentDetector extends Detector {
 
                                 while (carEventIterator.hasNext())
                                 {
-
-                                    //System.out.println(i);
+                                    
                                     CarEvent carEvent = carEventIterator.next();
 
                                     if (i == 1) {
