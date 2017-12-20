@@ -36,14 +36,14 @@ public class AverageSpeedViolationEvent {
         return getAvgSpeedInMetersPerSeconds() * new Double(2.23694);
     }
 
-    public Tuple6<Long,Long,String,String,Boolean,Double> toTuple()
+    public Tuple6<Long,Long,String,String,Integer,Double> toTuple()
     {
         return  new Tuple6<>(
                 enteringEvent.getTimestamp(),
                 exitingEvent.getTimestamp(),
                 enteringEvent.getVehicleID(),
                 enteringEvent.getHighwayID(),
-                enteringEvent.getWestbound(),
+                enteringEvent.getWestbound() ? 1 : 0,
                 getAvgSpeedInMilesPerHour()
         );
     }

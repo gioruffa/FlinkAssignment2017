@@ -31,7 +31,7 @@ public class AverageSpeedLimitDetector extends Detector {
     }
 
     @Override
-    public void processCarEventKeyedStream() {
+    public void processCarEventStream() {
         getCarEventStream()
                 .filter(
                     new SegmentRangeFilterFunction(
@@ -42,9 +42,9 @@ public class AverageSpeedLimitDetector extends Detector {
                 .keyBy(new VidHighwayWestboundKeySelector())
                 .window(EventTimeSessionWindows.withGap(Time.seconds(30)))
                 .apply(new AverageSpeedWindowFunction(speedLimit, startingSegment, endingSegment))
-                .map(new MapFunction<AverageSpeedViolationEvent, Tuple6<Long, Long, String, String, Boolean, Double>>() {
+                .map(new MapFunction<AverageSpeedViolationEvent, Tuple6<Long, Long, String, String, Integer, Double>>() {
                     @Override
-                    public Tuple6<Long, Long, String, String, Boolean, Double> map(AverageSpeedViolationEvent averageSpeedViolationEvent) throws Exception {
+                    public Tuple6<Long, Long, String, String, Integer, Double> map(AverageSpeedViolationEvent averageSpeedViolationEvent) throws Exception {
                         return averageSpeedViolationEvent.toTuple();
                     }
                 })

@@ -22,14 +22,14 @@ public class AccidentDetector extends Detector {
     }
 
     @Override
-    public void processCarEventKeyedStream() {
+    public void processCarEventStream() {
                 this.getCarEventStream()
                         .keyBy(new VidHighwayWestboundKeySelector())
                         .countWindow(4,1)
-                        .apply(new WindowFunction<CarEvent, Tuple7<Long,Long,String,String,Integer,Boolean,Integer>, Tuple3<String,String,Boolean>, GlobalWindow>() {
+                        .apply(new WindowFunction<CarEvent, Tuple7<Long,Long,String,String,Integer,Integer,Integer>, Tuple3<String,String,Boolean>, GlobalWindow>() {
 
                             @Override
-                            public void apply(Tuple3<String, String, Boolean> stringStringBooleanTuple3, GlobalWindow globalWindow, Iterable<CarEvent> iterable, Collector<Tuple7<Long,Long,String,String,Integer,Boolean,Integer>> collector) throws Exception {
+                            public void apply(Tuple3<String, String, Boolean> stringStringBooleanTuple3, GlobalWindow globalWindow, Iterable<CarEvent> iterable, Collector<Tuple7<Long,Long,String,String,Integer,Integer,Integer>> collector) throws Exception {
 
                                 Iterator<CarEvent> carEventIterator = iterable.iterator();
                                 Long startTimestamp = null;
@@ -57,13 +57,13 @@ public class AccidentDetector extends Detector {
 
                                             if (i == 4) {
                                                 stopTimestamp = carEvent.getTimestamp();
-                                                Tuple7<Long,Long,String,String,Integer,Boolean,Integer> finalTuple = new Tuple7<>(
+                                                Tuple7<Long,Long,String,String,Integer,Integer,Integer> finalTuple = new Tuple7<>(
                                                         startTimestamp,
                                                         stopTimestamp,
                                                         carEvent.getVehicleID(),
                                                         carEvent.getHighwayID(),
                                                         carEvent.getSegment(),
-                                                        carEvent.getWestbound(),
+                                                        carEvent.getWestbound() ? 1 : 0,
                                                         lastPosition
                                                 );
                                                 collector.collect(finalTuple);

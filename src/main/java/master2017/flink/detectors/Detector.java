@@ -49,7 +49,7 @@ public abstract class Detector {
         this.outputFileName = outputFileName;
     }
 
-    abstract public void processCarEventKeyedStream();
+    abstract public void processCarEventStream();
     public Path getOutputCSVFilePath()
     {
         return Paths.get(this.getOutputFolder(), this.getOutputFileName());

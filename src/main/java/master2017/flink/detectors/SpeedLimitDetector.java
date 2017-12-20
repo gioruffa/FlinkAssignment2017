@@ -35,18 +35,18 @@ public class SpeedLimitDetector extends Detector {
 
 
     @Override
-    public void processCarEventKeyedStream() {
+    public void processCarEventStream() {
         this.getCarEventStream().filter(
                 new HigherSpeedFilterFunction(speedLimitThreshold)
-        ).map(new MapFunction<CarEvent, Tuple6<Long, String, String, Integer, Boolean, Integer> >() {
+        ).map(new MapFunction<CarEvent, Tuple6<Long, String, String, Integer, Integer, Integer> >() {
             @Override
-            public Tuple6<Long, String, String, Integer, Boolean, Integer> map(CarEvent carEvent) throws Exception {
+            public Tuple6<Long, String, String, Integer, Integer, Integer> map(CarEvent carEvent) throws Exception {
                 return new Tuple6<>(
                         carEvent.getTimestamp(),
                         carEvent.getVehicleID(),
                         carEvent.getHighwayID(),
                         carEvent.getSegment(),
-                        carEvent.getWestbound(),
+                        carEvent.getWestbound() ? 1 : 0,
                         carEvent.getSpeedModule()
                 );
             }
