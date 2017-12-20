@@ -40,7 +40,8 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
 
     /**
      * Please note that this function has been designed taking into account that the event in the window
-     * can be unsorted (as it usually is)
+     * can be unsorted (as it usually is).
+     * The function can be reduced to a single while loop, but the readability is improved this way.
      * @param key
      * @param timeWindow
      * @param input
@@ -54,15 +55,17 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
             Iterable<CarEvent> input,
             Collector<AverageSpeedViolationEvent> collector
     ) throws Exception {
-        System.out.println("Applying window");
-        Iterator<CarEvent> debugIterator = input.iterator();
+//        System.out.println("Applying window");
+//        Iterator<CarEvent> debugIterator = input.iterator();
         Iterator<CarEvent> inputIterator = input.iterator();
-        Iterator<CarEvent> otherIterator = input.iterator();
+        Iterator<CarEvent> carEventIterator = input.iterator();
 
         boolean hasStartingMinus1 = false;
         boolean hasEndingPlus1 = false;
 
         //first of all we need to detect if the car has completed the track.
+        //because the car can exit before the end of the real end of segment or enter
+        //after the start of the segment,
         //we need at least one element in startingSegment-1 and endingSegment+1 (regardless of the direction)
 
         while (inputIterator.hasNext())
@@ -75,12 +78,11 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
         {
             return;
         }
-        while (debugIterator.hasNext()) {
-            CarEvent event = debugIterator.next();
-            System.out.println(event);
-        }
+//        while (debugIterator.hasNext()) {
+//            CarEvent event = debugIterator.next();
+//            System.out.println(event);
+//        }
         System.out.println("Car has completed the segments!");
-
 
 
         //if the car is going westbound -> first event in time is endingSegment, last is startingSegment
@@ -96,9 +98,9 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
         CarEvent exitingEvent = null;
 
         //get the minimum and maximum time and the associated values
-        while (otherIterator.hasNext())
+        while (carEventIterator.hasNext())
         {
-            CarEvent carEvent = otherIterator.next();
+            CarEvent carEvent = carEventIterator.next();
             //avoid segments outside start and end
             //remember that we still have events in 51 and 57 segment
             if(!(carEvent.getSegment().equals(enteringSegment) || carEvent.getSegment().equals(exitingSegment) ))
@@ -130,7 +132,7 @@ public class AverageSpeedWindowFunction implements WindowFunction<CarEvent, Aver
             collector.collect(candidateViolationEvent);
         }
 
-        System.out.println("Closing window");
+//        System.out.println("Closing window");
     }
 
     Integer getEnteringSegment(Boolean westbound)

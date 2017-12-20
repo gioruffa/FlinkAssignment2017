@@ -7,6 +7,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 
 
 public class SpeedLimitDetector extends Detector {
@@ -15,18 +16,14 @@ public class SpeedLimitDetector extends Detector {
 
     public SpeedLimitDetector(
             String outputFolder,
-            KeyedStream<CarEvent, Tuple3<String, String, Boolean>> carEventKeyedStream,
+            SingleOutputStreamOperator<CarEvent> carEventStream,
             Integer speedLimitThreshold
     )
     {
-        super(outputFolder, carEventKeyedStream,"speedfines.csv");
+        super(outputFolder, carEventStream,"speedfines.csv");
         this.speedLimitThreshold = speedLimitThreshold;
     }
 
-    public SpeedLimitDetector(String outputFolder, KeyedStream<CarEvent, Tuple3<String, String, Boolean>> carEventKeyedStream, String outputFileName, Integer speedLimitThreshold, FilterFunction<CarEvent> higherSpeedFilterFunction) {
-        super(outputFolder, carEventKeyedStream, outputFileName);
-        this.speedLimitThreshold = speedLimitThreshold;
-    }
 
     public Integer getSpeedLimitThreshold() {
         return speedLimitThreshold;
@@ -39,7 +36,7 @@ public class SpeedLimitDetector extends Detector {
 
     @Override
     public void processCarEventKeyedStream() {
-        this.getCarEventKeyedStream().filter(
+        this.getCarEventStream().filter(
                 new HigherSpeedFilterFunction(speedLimitThreshold)
         ).map(new MapFunction<CarEvent, Tuple6<Long, String, String, Integer, Boolean, Integer> >() {
             @Override

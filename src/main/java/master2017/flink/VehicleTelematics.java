@@ -24,8 +24,7 @@ public class VehicleTelematics {
     static String outputDirectoryPath;
     static Logger logger = LoggerFactory.getLogger(VehicleTelematics.class);
 
-    static public void main(String  [] args)
-    {
+    static public void main(String[] args) {
         if (!checkArgs(args)) {
             return;
         }
@@ -53,13 +52,14 @@ public class VehicleTelematics {
             }
         }).setParallelism(1)
                 .assignTimestampsAndWatermarks(
-                new AscendingTimestampExtractor<CarEvent>() {
-                    @Override
-                    public long extractAscendingTimestamp(CarEvent carEvent) {
-                        return carEvent.getTimestamp() * 1000;
-                    }
-                }
-        ).setParallelism(1);
+                        new AscendingTimestampExtractor<CarEvent>() {
+                            @Override
+                            public long extractAscendingTimestamp(CarEvent carEvent) {
+                                return carEvent.getTimestamp() * 1000;
+                            }
+                        }
+                )
+                .setParallelism(1);
 
         //check if it is working
 //        carEventStream.map(new MapFunction<CarEvent, CarEvent>() {
@@ -70,24 +70,24 @@ public class VehicleTelematics {
 //            }
 //        });
 
-        /*
-         * We have decided to parallelise with the finest grain possible.
-         * So we are basically following a single car on an highway on a single direction
-         */
-        KeyedStream<CarEvent, Tuple3<String, String, Boolean>> carEventKeyedStream = carEventStream.keyBy(
-                new VidHighwayWestboundKeySelector()
-        );
+//        /*
+//         * We have decided to parallelise with the finest grain possible.
+//         * So we are basically following a single car on an highway on a single direction
+//         */
+//        KeyedStream<CarEvent, Tuple3<String, String, Boolean>> carEventKeyedStream = carEventStream.keyBy(
+//                new VidHighwayWestboundKeySelector()
+//        );
 
 
         SpeedLimitDetector speedLimitDetector = new SpeedLimitDetector(
-            outputDirectoryPath,
-            carEventKeyedStream,
-            90
+                outputDirectoryPath,
+                carEventStream,
+                90
         );
 
         AverageSpeedLimitDetector averageSpeedLimitDetector = new AverageSpeedLimitDetector(
                 outputDirectoryPath,
-                carEventKeyedStream,
+                carEventStream,
                 60,
                 52,
                 56
@@ -95,7 +95,7 @@ public class VehicleTelematics {
 
         AccidentDetector accidentDetector = new AccidentDetector(
                 outputDirectoryPath,
-                carEventKeyedStream
+                carEventStream
         );
 
         speedLimitDetector.processCarEventKeyedStream();
@@ -106,26 +106,22 @@ public class VehicleTelematics {
         try {
             streamEnv.execute();
         } catch (Exception e) {
-            logger.error("Execption: " , e);
+            logger.error("Execption: ", e);
         }
 
 
     }
 
-    static boolean checkArgs(String [] args)
-    {
-        if (args.length != 2)
-        {
+    static boolean checkArgs(String[] args) {
+        if (args.length != 2) {
             System.err.println("Not enough arguments provided");
             return false;
         }
-        if (!(new File(args[0]).exists()))
-        {
+        if (!(new File(args[0]).exists())) {
             System.err.println("Input file does not exists");
             return false;
         }
-        if (!(new File(args[1])).isDirectory())
-        {
+        if (!(new File(args[1])).isDirectory()) {
             System.err.println("Second argument should be a directory");
             return false;
         }

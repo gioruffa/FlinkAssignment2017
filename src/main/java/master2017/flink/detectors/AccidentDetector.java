@@ -1,9 +1,11 @@
 package master2017.flink.detectors;
 
+import master2017.flink.KeySelectors.VidHighwayWestboundKeySelector;
 import master2017.flink.events.CarEvent;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple7;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.windowing.WindowFunction;
 import org.apache.flink.streaming.api.windowing.windows.GlobalWindow;
 import org.apache.flink.util.Collector;
@@ -14,14 +16,15 @@ public class AccidentDetector extends Detector {
 
     public AccidentDetector(
             String outputFolder,
-            KeyedStream<CarEvent, Tuple3<String, String, Boolean>> carEventKeyedStream
+            SingleOutputStreamOperator<CarEvent> carEventStream
     ){
-        super(outputFolder, carEventKeyedStream, "accidents.csv");
+        super(outputFolder, carEventStream, "accidents.csv");
     }
 
     @Override
     public void processCarEventKeyedStream() {
-                this.getCarEventKeyedStream()
+                this.getCarEventStream()
+                        .keyBy(new VidHighwayWestboundKeySelector())
                         .countWindow(4,1)
                         .apply(new WindowFunction<CarEvent, Tuple7<Long,Long,String,String,Integer,Boolean,Integer>, Tuple3<String,String,Boolean>, GlobalWindow>() {
 

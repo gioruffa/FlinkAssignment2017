@@ -9,6 +9,7 @@ import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple6;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.windowing.assigners.EventTimeSessionWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
 
@@ -19,11 +20,11 @@ public class AverageSpeedLimitDetector extends Detector {
 
     public AverageSpeedLimitDetector(
             String outputFolder,
-            KeyedStream<CarEvent, Tuple3<String, String, Boolean>> carEventKeyedStream,
+            SingleOutputStreamOperator<CarEvent> carEventStream,
             Integer speedLimit,
             Integer startingSegment,
             Integer endingSegment) {
-        super(outputFolder, carEventKeyedStream, "avgspeedfines.csv");
+        super(outputFolder, carEventStream, "avgspeedfines.csv");
         this.speedLimit = speedLimit;
         this.startingSegment = startingSegment;
         this.endingSegment = endingSegment;
@@ -31,7 +32,7 @@ public class AverageSpeedLimitDetector extends Detector {
 
     @Override
     public void processCarEventKeyedStream() {
-        getCarEventKeyedStream()
+        getCarEventStream()
                 .filter(
                     new SegmentRangeFilterFunction(
                             startingSegment - 1,
@@ -39,7 +40,7 @@ public class AverageSpeedLimitDetector extends Detector {
                     ) //the car has to complete the sectors, so the only way to know if they appear before and late
                 )
                 .keyBy(new VidHighwayWestboundKeySelector())
-                .window(EventTimeSessionWindows.withGap(Time.seconds(60)))
+                .window(EventTimeSessionWindows.withGap(Time.seconds(30)))
                 .apply(new AverageSpeedWindowFunction(speedLimit, startingSegment, endingSegment))
                 .map(new MapFunction<AverageSpeedViolationEvent, Tuple6<Long, Long, String, String, Boolean, Double>>() {
                     @Override
