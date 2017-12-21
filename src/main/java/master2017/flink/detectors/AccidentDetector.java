@@ -2,6 +2,7 @@ package master2017.flink.detectors;
 
 import master2017.flink.KeySelectors.VidHighwayWestboundKeySelector;
 import master2017.flink.events.CarEvent;
+import org.apache.flink.api.common.functions.FilterFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.tuple.Tuple7;
 import org.apache.flink.streaming.api.datastream.KeyedStream;
@@ -24,6 +25,14 @@ public class AccidentDetector extends Detector {
     @Override
     public void processCarEventStream() {
                 this.getCarEventStream()
+                        .filter(
+                                new FilterFunction<CarEvent>() {
+                                    @Override
+                                    public boolean filter(CarEvent value) throws Exception {
+                                        return value.getSpeedModule().equals(0);
+                                    }
+                                }
+                        )
                         .keyBy(new VidHighwayWestboundKeySelector())
                         .countWindow(4,1)
                         .apply(new WindowFunction<CarEvent, Tuple7<Long,Long,String,String,Integer,Integer,Integer>, Tuple3<String,String,Boolean>, GlobalWindow>() {
