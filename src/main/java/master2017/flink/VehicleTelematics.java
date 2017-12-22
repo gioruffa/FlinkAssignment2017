@@ -31,7 +31,7 @@ public class VehicleTelematics {
         final StreamExecutionEnvironment streamEnv = StreamExecutionEnvironment.getExecutionEnvironment();
         streamEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 //        streamEnv.setParallelism(1); //for debugging
-        streamEnv.setParallelism(10);
+        streamEnv.setParallelism(10); // overridden by CLI
 
         DataStreamSource<String> fileStreamSource = streamEnv.readTextFile(inputFilePath).setParallelism(1);
 
