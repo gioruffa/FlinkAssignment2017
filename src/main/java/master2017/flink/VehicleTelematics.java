@@ -31,7 +31,6 @@ public class VehicleTelematics {
         final StreamExecutionEnvironment streamEnv = StreamExecutionEnvironment.getExecutionEnvironment();
         streamEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
 //        streamEnv.setParallelism(1); //for debugging
-//        streamEnv.setParallelism(1); //for debugging
         streamEnv.setParallelism(10);
 
         DataStreamSource<String> fileStreamSource = streamEnv.readTextFile(inputFilePath).setParallelism(1);
@@ -46,34 +45,8 @@ public class VehicleTelematics {
                     ex.printStackTrace();
                 }
             }
-        })
-//                .assignTimestampsAndWatermarks(
-//                        new AscendingTimestampExtractor<CarEvent>() {
-//                            @Override
-//                            public long extractAscendingTimestamp(CarEvent carEvent) {
-//                                return carEvent.getTimestamp() * 1000;
-//                            }
-//                        }
-//                )
-//                .setParallelism(1);
+        }).setParallelism(1) //parallelism needed for the count windows, otherwise they are not in order
         ;
-        //check if it is working
-//        carEventStream.map(new MapFunction<CarEvent, CarEvent>() {
-//            @Override
-//            public CarEvent map(CarEvent carEvent) throws Exception {
-//                System.out.println(carEvent.toString());
-//                return carEvent;
-//            }
-//        });
-
-//        /*
-//         * We have decided to parallelise with the finest grain possible.
-//         * So we are basically following a single car on an highway on a single direction
-//         */
-//        KeyedStream<CarEvent, Tuple3<String, String, Boolean>> carEventKeyedStream = carEventStream.keyBy(
-//                new VidHighwayWestboundKeySelector()
-//        );
-
 
         SpeedLimitDetector speedLimitDetector = new SpeedLimitDetector(
                 outputDirectoryPath,
