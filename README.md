@@ -66,19 +66,25 @@ identifier `VID`=3:
 
 The main program receives two arguments: the path to the csv with the events and the destination folder to write the 
 results. In this last folder, you will find three csv files, each one storing the output of three types of events 
-detected as explained above. There is a sample file in the `test/resources`. We recommend to
-take a look at the test to see how the program works.
+detected as explained above. There is a sample file in the [data/](data/traffic-3xways_head1M.tar.gz) folder that needs to be extracted.
+
+If you don't have a flink cluster running you can launch it locally. 
+
+```bash
+$FLINK_HOME/bin/start-local.sh
+```
 
 To run the app with the sample csv, run the following commands:
 
 ```bash
 $ mvn clean package -Pbuild-jar
+$ mkdir -p output
 $ flink run -p 10 -c master2017.flink.VehicleTelematics target/$YOUR_JAR_FILE
 $PATH_TO_INPUT_FILE $PATH_TO_OUTPUT_FOLDER
 
 ```
 
-The first command will also run the tests. Finally, check the `tmp` folder for the results 
+Check the `output` folder for the results 
 (`accidents.csv`, `avgspeedfines.csv` and `speedfines.csv`).
 
 ## Acknowledgements
@@ -87,8 +93,8 @@ with his permission.
 
 ## Authors
 
-* **Fernando Díaz**
-* **Eva Gil**
+* **Giorgio Ruffa**
+* **Jaime Elguero Tejera**
 
 ## License
 
