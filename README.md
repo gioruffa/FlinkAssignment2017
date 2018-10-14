@@ -79,17 +79,14 @@ To run the app with the sample csv, run the following commands:
 ```bash
 $ mvn clean package -Pbuild-jar
 $ mkdir -p output
-$ flink run -p 10 -c master2017.flink.VehicleTelematics target/$YOUR_JAR_FILE
-$PATH_TO_INPUT_FILE $PATH_TO_OUTPUT_FOLDER
-
+$ flink run -p 10 -c master2017.flink.VehicleTelematics target/flink-assignment-1.0-SNAPSHOT.jar $PATH_TO_INPUT_FILE $PATH_TO_OUTPUT_FOLDER
 ```
 
 Check the `output` folder for the results 
 (`accidents.csv`, `avgspeedfines.csv` and `speedfines.csv`).
 
 ## Acknowledgements
-This readme was adapted from the one provided by [Fernando Díaz González](https://github.com/fdiazgon/flink-vehicle-telematics)
-with his permission. 
+This readme was adapted from the one provided by [Fernando Díaz González](https://github.com/fdiazgon/flink-vehicle-telematics), with his permission. 
 
 ## Authors
 
